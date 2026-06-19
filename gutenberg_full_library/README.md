@@ -7,7 +7,7 @@ Project Gutenberg publishes official bulk access options. Use these instead of c
 Project Gutenberg provides a weekly-updated archive of all `.txt` files:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\outputs\gutenberg_full_library\download_all_txt_windows.ps1
+powershell -ExecutionPolicy Bypass -File .\gutenberg_full_library\download_all_txt_windows.ps1
 ```
 
 This downloads:
@@ -18,21 +18,21 @@ This downloads:
 By default, files are saved under:
 
 ```text
-outputs\gutenberg_all_txt
+gutenberg_all_txt
 ```
 
-The archive is about 10 GB compressed. Plan for tens of GB after extraction.
+The archive is about 10 GB compressed. Plan for tens of GB after extraction. The Windows downloader uses `curl.exe` with resume support, so re-running it continues an interrupted archive download instead of starting over.
 
 To download but skip extraction:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\outputs\gutenberg_full_library\download_all_txt_windows.ps1 -SkipExtract
+powershell -ExecutionPolicy Bypass -File .\gutenberg_full_library\download_all_txt_windows.ps1 -SkipExtract
 ```
 
 To choose another destination:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\outputs\gutenberg_full_library\download_all_txt_windows.ps1 -OutDir D:\gutenberg_all_txt
+powershell -ExecutionPolicy Bypass -File .\gutenberg_full_library\download_all_txt_windows.ps1 -OutDir D:\gutenberg_all_txt
 ```
 
 ## True Full Mirror: All Formats / All Files
@@ -42,7 +42,7 @@ For a full private mirror, Project Gutenberg recommends `rsync`. This is the rig
 From WSL, Linux, or macOS:
 
 ```bash
-bash outputs/gutenberg_full_library/mirror_gutenberg_rsync.sh /mnt/d/gutenberg-mirror
+bash gutenberg_full_library/mirror_gutenberg_rsync.sh /mnt/d/gutenberg-mirror
 ```
 
 That script mirrors:

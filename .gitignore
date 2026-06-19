@@ -1,0 +1,5 @@
+gutenberg_all_txt/
+legal_corpus/
+*.tar
+*.tar.zip
+*.csv.gz

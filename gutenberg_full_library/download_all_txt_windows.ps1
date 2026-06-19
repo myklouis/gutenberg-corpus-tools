@@ -20,31 +20,60 @@ New-Item -ItemType Directory -Force -Path $ContentDir | Out-Null
 function Download-File {
   param(
     [string]$Url,
-    [string]$Destination
+    [string]$Destination,
+    [switch]$Resume
   )
-
-  if (Test-Path -LiteralPath $Destination) {
-    Write-Host "Already exists: $Destination"
-    return
-  }
 
   Write-Host "Downloading: $Url"
   Write-Host "To:          $Destination"
 
-  try {
-    Start-BitsTransfer -Source $Url -Destination $Destination -DisplayName "Project Gutenberg bulk download"
-  } catch {
-    Write-Host "BITS download unavailable; falling back to standard web download."
-    Invoke-WebRequest -Uri $Url -OutFile $Destination
+  if (-not (Get-Command curl.exe -ErrorAction SilentlyContinue)) {
+    throw "curl.exe was not found. Install curl or use a recent Windows build that includes it."
+  }
+
+  $curlArgs = @(
+    "--fail",
+    "--location",
+    "--output",
+    $Destination
+  )
+
+  if ($Resume) {
+    $curlArgs = @("--continue-at", "-") + $curlArgs
+  }
+
+  $curlArgs += $Url
+  & curl.exe @curlArgs
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "Download failed for $Url"
   }
 }
 
-Download-File -Url $ArchiveUrl -Destination $ArchivePath
-Download-File -Url $CatalogUrl -Destination $CatalogPath
+function Test-ZipArchive {
+  param([string]$Path)
+
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+  try {
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($Path)
+    $archive.Dispose()
+    return $true
+  } catch {
+    return $false
+  }
+}
+
+Download-File -Url $ArchiveUrl -Destination $ArchivePath -Resume
+Download-File -Url $CatalogUrl -Destination $CatalogPath -Resume
 
 if ($SkipExtract) {
   Write-Host "Download complete. Extraction skipped."
   exit 0
+}
+
+if (-not (Test-ZipArchive -Path $ArchivePath)) {
+  throw "The archive is incomplete or invalid. Re-run this script to resume the download: $ArchivePath"
 }
 
 Write-Host "Extracting zip archive..."
